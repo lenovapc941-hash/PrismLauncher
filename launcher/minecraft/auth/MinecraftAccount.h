@@ -116,7 +116,13 @@ class MinecraftAccount : public QObject, public Usable {
 
     AccountType accountType() const noexcept { return data.type; }
 
-    bool ownsMinecraft() const { return data.type != AccountType::Offline && data.minecraftEntitlement.ownsMinecraft; }
+    // Crack/offline hesaplar tam sürüm oynayabilsin diye sahiplik var sayılır
+    bool ownsMinecraft() const
+    {
+        if (data.type == AccountType::Offline)
+            return true;
+        return data.minecraftEntitlement.ownsMinecraft;
+    }
 
     bool hasProfile() const { return data.profileId().size() != 0; }
 
