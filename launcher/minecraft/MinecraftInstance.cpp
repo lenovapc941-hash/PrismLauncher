@@ -1182,8 +1182,10 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     }
 
     // load meta
+    // Crack: offline hesap da ilk kurulumda sürüm dosyalarını indirebilsin diye her zaman Online dene.
+    // Dosyalar önbellekteyse internetsiz de çalışır, eksikse indirir.
     {
-        auto mode = session->launchMode != LaunchMode::Offline ? Net::Mode::Online : Net::Mode::Offline;
+        auto mode = Net::Mode::Online;
         process->appendStep(makeShared<TaskStepWrapper>(pptr, makeShared<MinecraftLoadAndCheck>(this, mode)));
     }
 
@@ -1202,14 +1204,13 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
         process->appendStep(step);
     }
 
-    // if we aren't in offline mode
+    // Crack: offline modda da kütüphane/asset indirilsin ki yeni instance ilk açılışta çalışsın.
+    // Hesap kilidi sadece online MSA için gerekli, offline hesapta gerekmez.
     if (session->launchMode != LaunchMode::Offline) {
         process->appendStep(makeShared<ClaimAccount>(pptr, session));
-        for (auto t : createUpdateTask()) {
-            process->appendStep(makeShared<TaskStepWrapper>(pptr, t));
-        }
-    } else {
-        process->appendStep(makeShared<EnsureOfflineLibraries>(pptr, this));
+    }
+    for (auto t : createUpdateTask()) {
+        process->appendStep(makeShared<TaskStepWrapper>(pptr, t));
     }
 
     // if there are any jar mods
