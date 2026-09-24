@@ -588,6 +588,10 @@ bool AccountList::anyAccountIsValid()
         if (account->ownsMinecraft()) {
             return true;
         }
+        // Crack/offline hesaplar da geçerli sayılsın, Microsoft zorunluluğu olmasın
+        if (account->accountType() == AccountType::Offline) {
+            return true;
+        }
     }
     return false;
 }
